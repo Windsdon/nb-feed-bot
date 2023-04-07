@@ -1,4 +1,3 @@
-import time
 from logging import Logger
 
 from celery import Celery
@@ -7,7 +6,7 @@ from celery.utils.log import get_task_logger
 from bot.config import config
 from bot.discord import post_message
 from bot.feed import read_feed
-from bot.models import FeedEntry
+from bot.models import FeedEntry, PostDetails
 from bot.opengraph import fetch_post_details
 from bot.storage import get_last_published_timestamp, set_last_published_timestamp
 
@@ -33,16 +32,24 @@ def check_posts_task():
     set_last_published_timestamp(new_last_published)
     logger.info(f'Last published updated to: {new_last_published}')
 
-    for entry in entries:
+    if last_published_ts is None:
+        logger.info('Will not post anything because this is the first run')
+        return
+
+    for entry in sorted(entries, key=lambda e: e.published):
         logger.info(f'Processing entry published at {entry.published}')
-        if last_published_ts is None or entry.published > last_published_ts:
-            post_message_task.delay(entry.dict())
+        if entry.published > last_published_ts:
+            prepare_entry_task.delay(entry.dict())
+
+
+@app.task
+def prepare_entry_task(entry: dict):
+    entry = FeedEntry.parse_obj(entry)
+    details = fetch_post_details(entry.link)
+    send_message_task.delay(details.dict())
 
 
 @app.task(rate_limit='1/s')
-def post_message_task(entry: dict):
-    entry = FeedEntry.parse_obj(entry)
-    # logger.info(f'Fetching details for {entry.dict()}')
-    details = fetch_post_details(entry.link)
-    # logger.info(f'Would post: {details.dict()}')
+def send_message_task(details: dict):
+    details = PostDetails.parse_obj(details)
     post_message(config.webhook_url, details)
