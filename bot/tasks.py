@@ -37,8 +37,8 @@ def check_posts_task():
         return
 
     for entry in sorted(entries, key=lambda e: e.published):
-        logger.info(f'Processing entry published at {entry.published}')
         if entry.published > last_published_ts:
+            logger.info(f'Entry published at {entry.published} will be posted')
             prepare_entry_task.delay(entry.dict())
 
 
