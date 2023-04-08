@@ -1,0 +1,49 @@
+{
+	"title": "FeedConfigFile",
+	"type": "object",
+	"properties": {
+		"feeds": {
+			"title": "Feeds",
+			"type": "object",
+			"additionalProperties": {
+				"$ref": "#/definitions/FeedConfig"
+			}
+		}
+	},
+	"required": [
+		"feeds"
+	],
+	"definitions": {
+		"FeedConfig": {
+			"title": "FeedConfig",
+			"type": "object",
+			"properties": {
+				"webhook_url": {
+					"title": "Webhook Url",
+					"type": "string"
+				},
+				"feed_url": {
+					"title": "Feed Url",
+					"type": "string"
+				},
+				"colour": {
+					"title": "Colour",
+					"type": "string"
+				},
+				"name": {
+					"title": "Name",
+					"type": "string"
+				},
+				"avatar": {
+					"title": "Avatar",
+					"type": "string"
+				}
+			},
+			"required": [
+				"webhook_url",
+				"feed_url",
+				"colour"
+			]
+		}
+	}
+}

@@ -1,4 +1,4 @@
-import time
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -18,9 +18,15 @@ class FeedEntry(BaseModel):
     id: str
     link: str
     title: str
-    content: list[FieldContent]
-    media_thumbnail: list[FieldMedia]
     published: str
+
+
+class FeedConfig(BaseModel):
+    webhook_url: str
+    feed_url: str
+    colour: str
+    name: Optional[str]
+    avatar: Optional[str]
 
 
 class PostDetails(BaseModel):
@@ -28,4 +34,17 @@ class PostDetails(BaseModel):
     title: str
     description: str
     image_url: str
-    colour: str
+    feed: FeedConfig
+
+
+class FeedConfigFile(BaseModel):
+    feeds: dict[str, FeedConfig]
+
+
+if __name__ == '__main__':
+    import os
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    with open(os.path.realpath(os.path.join(dir_path, '../__schemas__/FeedConfigFile.json')), 'wt') as f:
+        f.write(FeedConfigFile.schema_json(indent='\t'))

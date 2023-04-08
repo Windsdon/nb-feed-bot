@@ -1,0 +1,5 @@
+feeds:
+  bbc:
+    webhook_url: https://discord.com/api/webhooks/1234/xyz
+    colour: "#FF9900"
+    feed_url: https://feeds.bbci.co.uk/news/rss.xml

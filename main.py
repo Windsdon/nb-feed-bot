@@ -1,19 +1,35 @@
-import asyncio
+import time
 
-from bot.config import config
+from bot.config import load_sources
 from bot.discord import post_message
 from bot.feed import read_feed
 from bot.opengraph import fetch_post_details
+from bot.storage import get_published_list
 
 
 def main():
-    entries = read_feed(config.feed_url)
+    sources = load_sources()
 
-    for entry in entries:
-        details = fetch_post_details(entry.link)
+    for feed_id, feed in sources.items():
+        entries = read_feed(feed.feed_url)
+        published_list = get_published_list(feed_id)
 
-        post_message(config.webhook_url, details)
-        asyncio.sleep(1)
+        if len(published_list) == 0:
+            # this is the first run, append everything and skip posting
+            for entry in entries:
+                published_list.append(entry.id)
+
+            continue
+
+        for entry in entries:
+            if entry.id in published_list:
+                continue
+
+            details = fetch_post_details(entry.link, feed)
+
+            post_message(details)
+            published_list.append(entry.id)
+            time.sleep(1)
 
 
 if __name__ == '__main__':

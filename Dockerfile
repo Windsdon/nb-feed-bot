@@ -26,4 +26,4 @@ COPY . /code
 
 USER app
 
-CMD ["celery", "-A", "bot.tasks", "worker", "--loglevel=DEBUG", "-E", "-B", "--pool", "threads"]
+CMD ["celery", "-A", "bot.tasks", "worker", "--loglevel=INFO", "-E", "-B", "--pool", "threads"]
