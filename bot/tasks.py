@@ -1,4 +1,5 @@
 from logging import Logger
+from urllib.error import URLError
 
 from celery import Celery
 from celery.utils.log import get_task_logger
@@ -53,7 +54,7 @@ def check_posts_task(feed_id: str, feed: dict):
             published_list.append(entry.id)
 
 
-@app.task
+@app.task(autoretry_for=(URLError, OSError), retry_backoff=True)
 def prepare_entry_task(entry: dict, feed: dict):
     entry = FeedEntry.parse_obj(entry)
     feed = FeedConfig.parse_obj(feed)
